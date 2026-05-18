@@ -1,0 +1,72 @@
+pipeline {
+
+    agent any
+
+    tools {
+        // Necesario porque este job recompila el JAR de forma independiente.
+        maven 'Maven'
+        jdk 'JDK17'
+    }
+
+    options {
+        timestamps()
+        timeout(time: 20, unit: 'MINUTES')
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo 'Obteniendo código fuente...'
+                // Reemplaza 'checkout scm': este job se dispara desde el CI (build job)
+                // y no está necesariamente vinculado a un SCM Multibranch.
+                git branch: 'main', url: 'https://github.com/OtttaMeza/actividad_evaluativa_2.git'
+            }
+        }
+
+        stage('Build JAR') {
+            steps {
+                echo 'Compilando artefacto (el CI usa cleanWs y este job es independiente)...'
+                // -DskipTests: los tests y el Quality Gate ya pasaron en el pipeline CI.
+                sh 'mvn -B clean package -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t mi-app:latest .'
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
+                echo 'Desplegando app...'
+
+                sh '''
+                docker stop mi-app || true
+                docker rm mi-app || true
+
+                docker run -d -p 9090:9090 --name mi-app mi-app:latest
+                '''
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo 'Pipeline completado con éxito'
+            // Movido desde 'always': solo se archiva si el build generó JAR.
+            // allowEmptyArchive evita fallo si el patrón no encuentra artefactos.
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true, allowEmptyArchive: true
+        }
+
+        failure {
+            echo 'El pipeline ha fallado. Revisa los logs.'
+        }
+
+        cleanup {
+            cleanWs()
+        }
+    }
+}

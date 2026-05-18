@@ -59,6 +59,11 @@ pipeline {
         }
         success {
             echo 'Pipeline OK — Quality Gate aprobado'
+            // Encadenamiento CI -> CD: dispara el job de deploy SOLO si el Quality Gate pasó.
+            // wait:false  -> el CI no se bloquea esperando al deploy (fire-and-forget).
+            // El job 'pipeline-deploy' es independiente: hace su propio checkout + build,
+            // por lo que cleanWs() en este pipeline no le afecta.
+            build job: 'DPLOYMENT/GCV-PROD', wait: false
         }
         failure {
             echo 'Pipeline FAILED — revisar logs y SonarCloud'
@@ -67,6 +72,7 @@ pipeline {
             //      body: "Ver: ${env.BUILD_URL}"
         }
         cleanup {
+            // Se mantiene: el CD es un job independiente que recompila, no depende de este workspace.
             cleanWs()
         }
     }
