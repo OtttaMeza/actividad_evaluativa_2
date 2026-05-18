@@ -1,0 +1,398 @@
+{
+  "info": {
+    "name": "GCV - Citas Veterinarias",
+    "description": "Colección de pruebas funcionales para la API REST de gestión de citas veterinarias.\nCubre CP1, CP2, CP3, CP4, CP5, CP6, CP7 y CP9 alineados con la suite de automatización.\n\nVariables requeridas:\n  - base_url : http://localhost:9090",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:9090",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "CP1 - Registro exitoso",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/api/appointments", "host": ["{{base_url}}"], "path": ["api", "appointments"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientName\": \"Juan Perez\",\n  \"petName\": \"Rex\",\n  \"appointmentTime\": \"{{$isoTimestamp}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "Crea una cita con todos los campos válidos. Espera 201 con el objeto guardado."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Genera una fecha futura (+1 día) en formato ISO 8601",
+              "const tomorrow = new Date();",
+              "tomorrow.setDate(tomorrow.getDate() + 1);",
+              "tomorrow.setMilliseconds(0);",
+              "pm.collectionVariables.set('cp1_time', tomorrow.toISOString().replace('Z',''));"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('CP1 - Status 201 Created', () => {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('CP1 - Content-Type es application/json', () => {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "const body = pm.response.json();",
+              "",
+              "pm.test('CP1 - id auto-generado no es nulo y es mayor que 0', () => {",
+              "    pm.expect(body.id).to.not.be.null;",
+              "    pm.expect(body.id).to.be.a('number').and.greaterThan(0);",
+              "    pm.collectionVariables.set('last_id', body.id);",
+              "});",
+              "",
+              "pm.test('CP1 - clientName es Juan Perez', () => {",
+              "    pm.expect(body.clientName).to.eql('Juan Perez');",
+              "});",
+              "",
+              "pm.test('CP1 - petName es Rex', () => {",
+              "    pm.expect(body.petName).to.eql('Rex');",
+              "});",
+              "",
+              "pm.test('CP1 - appointmentTime presente en la respuesta', () => {",
+              "    pm.expect(body.appointmentTime).to.not.be.null;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "CP2 - clientName vacío",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/api/appointments", "host": ["{{base_url}}"], "path": ["api", "appointments"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientName\": \"\",\n  \"petName\": \"Rex\",\n  \"appointmentTime\": \"2099-12-01T10:00:00\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "Envía clientName vacío. Espera 400 con el mensaje de validación en el campo clientName."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('CP2 - Status 400 Bad Request', () => {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('CP2 - Content-Type es application/json', () => {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "const body = pm.response.json();",
+              "",
+              "pm.test('CP2 - Mensaje de error en clientName', () => {",
+              "    pm.expect(body.clientName).to.eql('El nombre es obligatorio');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "CP5 - petName vacío",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/api/appointments", "host": ["{{base_url}}"], "path": ["api", "appointments"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientName\": \"Juan Perez\",\n  \"petName\": \"\",\n  \"appointmentTime\": \"2099-12-02T10:00:00\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "Envía petName vacío. Espera 400 con el mensaje de validación en el campo petName."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('CP5 - Status 400 Bad Request', () => {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "const body = pm.response.json();",
+              "",
+              "pm.test('CP5 - Mensaje de error en petName', () => {",
+              "    pm.expect(body.petName).to.eql('El nombre de la mascota es obligatorio');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "CP6 - Múltiples campos vacíos",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/api/appointments", "host": ["{{base_url}}"], "path": ["api", "appointments"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientName\": \"\",\n  \"petName\": \"\",\n  \"appointmentTime\": \"2099-12-03T10:00:00\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "Envía clientName y petName vacíos. Espera 400 con ambos mensajes de error en la misma respuesta."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('CP6 - Status 400 Bad Request', () => {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "const body = pm.response.json();",
+              "",
+              "pm.test('CP6 - Error en clientName presente', () => {",
+              "    pm.expect(body.clientName).to.eql('El nombre es obligatorio');",
+              "});",
+              "",
+              "pm.test('CP6 - Error en petName presente', () => {",
+              "    pm.expect(body.petName).to.eql('El nombre de la mascota es obligatorio');",
+              "});",
+              "",
+              "pm.test('CP6 - Ambos errores en la misma respuesta', () => {",
+              "    pm.expect(body).to.have.property('clientName');",
+              "    pm.expect(body).to.have.property('petName');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "CP3a - Primera cita (horario conflicto)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/api/appointments", "host": ["{{base_url}}"], "path": ["api", "appointments"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientName\": \"User 1\",\n  \"petName\": \"Pet 1\",\n  \"appointmentTime\": \"2099-12-10T15:00:00\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "Primera cita en el horario 2099-12-10T15:00:00. Debe guardarse con éxito (201). Ejecutar ANTES de CP3b."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('CP3a - Status 201 Created (primera cita guardada)', () => {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "const body = pm.response.json();",
+              "",
+              "pm.test('CP3a - clientName es User 1', () => {",
+              "    pm.expect(body.clientName).to.eql('User 1');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "CP3b - Conflicto de horario (409)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/api/appointments", "host": ["{{base_url}}"], "path": ["api", "appointments"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientName\": \"User 2\",\n  \"petName\": \"Pet 2\",\n  \"appointmentTime\": \"2099-12-10T15:00:00\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "Segunda cita con el mismo horario que CP3a. Debe fallar con 409 Conflict."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('CP3b - Status 409 Conflict', () => {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "pm.test('CP3b - Mensaje Horario no disponible', () => {",
+              "    pm.expect(pm.response.text()).to.include('Horario no disponible');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "CP9 - Mascota no pertenece al perfil (petId > 100)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/api/appointments", "host": ["{{base_url}}"], "path": ["api", "appointments"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientName\": \"Juan\",\n  \"petName\": \"Rex\",\n  \"appointmentTime\": \"2099-12-20T10:00:00\",\n  \"petId\": 500\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "petId = 500 (> 100). La regla de negocio rechaza la cita con 400."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('CP9 - Status 400 Bad Request', () => {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('CP9 - Mensaje mascota no pertenece al perfil', () => {",
+              "    pm.expect(pm.response.text()).to.include('La mascota seleccionada no pertenece a tu perfil');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "CP7 - Mascota válida (petId ≤ 100)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/api/appointments", "host": ["{{base_url}}"], "path": ["api", "appointments"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientName\": \"Maria Lopez\",\n  \"petName\": \"Luna\",\n  \"appointmentTime\": \"2099-12-25T11:00:00\",\n  \"petId\": 50\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "petId = 50 (≤ 100). Cubre la rama false del guard de mascota. Espera 201 con petId en la respuesta."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('CP7 - Status 201 Created', () => {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "const body = pm.response.json();",
+              "",
+              "pm.test('CP7 - id generado automáticamente', () => {",
+              "    pm.expect(body.id).to.not.be.null;",
+              "    pm.expect(body.id).to.be.greaterThan(0);",
+              "});",
+              "",
+              "pm.test('CP7 - clientName es Maria Lopez', () => {",
+              "    pm.expect(body.clientName).to.eql('Maria Lopez');",
+              "});",
+              "",
+              "pm.test('CP7 - petName es Luna', () => {",
+              "    pm.expect(body.petName).to.eql('Luna');",
+              "});",
+              "",
+              "pm.test('CP7 - petId retornado es 50', () => {",
+              "    pm.expect(body.petId).to.eql(50);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "CP4 - Listar todas las citas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/appointments", "host": ["{{base_url}}"], "path": ["api", "appointments"] },
+        "description": "Obtiene todas las citas registradas. Ejecutar después de haber creado al menos una cita (CP1 o CP7). Espera 200 con lista no vacía."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('CP4 - Status 200 OK', () => {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('CP4 - Content-Type es application/json', () => {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "const body = pm.response.json();",
+              "",
+              "pm.test('CP4 - La respuesta es un array', () => {",
+              "    pm.expect(body).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('CP4 - Al menos 1 cita registrada', () => {",
+              "    pm.expect(body.length).to.be.greaterThan(0);",
+              "});",
+              "",
+              "pm.test('CP4 - Cada cita tiene id, clientName y petName', () => {",
+              "    body.forEach(cita => {",
+              "        pm.expect(cita).to.have.property('id');",
+              "        pm.expect(cita).to.have.property('clientName');",
+              "        pm.expect(cita).to.have.property('petName');",
+              "    });",
+              "});",
+              "",
+              "const names = body.map(c => c.clientName);",
+              "pm.test('CP4 - Juan Perez está en la lista (si CP1 se ejecutó antes)', () => {",
+              "    pm.expect(names).to.include('Juan Perez');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}
