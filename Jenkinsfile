@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
     // Recomendado en entornos con varios agentes: agent { label 'maven' }
 
