@@ -192,32 +192,32 @@ public class AppointmentAutomationTest {
             .body("petId", equalTo(50));
     }
 
-    // CP4: GET todas las citas — verifica 200, lista no vacía y datos del primer registro
-//    @Test
-//    public void testCP4_ListarCitas() {
-//        // Seed: crear una cita conocida
-//        AppointmentRequest request = AppointmentRequest.builder()
-//                .clientName("Carlos Ruiz")
-//                .petName("Toby")
-//                .appointmentTime(LocalDateTime.now().plusDays(10).withNano(0))
-//                .build();
-//
-//        given()
-//            .contentType(ContentType.JSON)
-//            .body(request)
-//        .when()
-//            .post("/api/appointments");
-//
-//        // Verificar que GET retorna al menos esa cita con datos correctos
-//        given()
-//        .when()
-//            .get("/api/appointments")
-//        .then()
-//            .statusCode(200)
-//            .contentType(ContentType.JSON)
-//            .body("$", not(empty()))
-//            .body("size()", greaterThanOrEqualTo(1))
-//            .body("clientName", hasItem("Carlos Ruiz"))
-//            .body("petName", hasItem("Toby"));
-//    }
+//     CP4: GET todas las citas — verifica 200, lista no vacía y datos del primer registro
+    @Test
+    public void testCP4_ListarCitas() {
+        // Seed: crear una cita conocida
+        AppointmentRequest request = AppointmentRequest.builder()
+                .clientName("Carlos Ruiz")
+                .petName("Toby")
+                .appointmentTime(LocalDateTime.now().plusDays(10).withNano(0))
+                .build();
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(request)
+        .when()
+            .post("/api/appointments");
+
+        // Verificar que GET retorna al menos esa cita con datos correctos
+        given()
+        .when()
+            .get("/api/appointments")
+        .then()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .body("$", not(empty()))
+            .body("size()", greaterThanOrEqualTo(1))
+            .body("clientName", hasItem("Carlos Ruiz"))
+            .body("petName", hasItem("Toby"));
+    }
 }
