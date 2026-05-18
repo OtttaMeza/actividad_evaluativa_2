@@ -40,7 +40,14 @@ pipeline {
         stage('Publish Reports') {
             steps {
                 junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: false
-                recordCoverage tools: [[parser: 'JACOCO', pattern: 'target/site/jacoco/jacoco.xml']]
+                publishHTML(target: [
+                    allowMissing         : false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll              : true,
+                    reportDir            : 'target/site/jacoco',
+                    reportFiles          : 'index.html',
+                    reportName           : 'JaCoCo Coverage Report'
+                ])
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true, allowEmptyArchive: true
             }
         }
