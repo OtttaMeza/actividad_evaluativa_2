@@ -25,8 +25,8 @@
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.java.source>17</sonar.java.source>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-		<sonar.exclusions>**/ActivityApplication.java,**/model/**,**/repository/**</sonar.exclusions>
-		<sonar.coverage.exclusions>**/ActivityApplication.java,**/model/**,**/repository/**</sonar.coverage.exclusions>
+		<sonar.exclusions>**/ActivityApplication.java,**/model/**,**/repository/**,**/dto/**</sonar.exclusions>
+		<sonar.coverage.exclusions>**/ActivityApplication.java,**/model/**,**/repository/**,**/dto/**</sonar.coverage.exclusions>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -93,6 +93,7 @@
 						<exclude>**/ActivityApplication.class</exclude>
 						<exclude>**/model/**</exclude>
 						<exclude>**/repository/**</exclude>
+						<exclude>**/dto/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
