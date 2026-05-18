@@ -1,5 +1,7 @@
+com\utb\quality\dto\AppointmentRequest.class
 com\utb\quality\model\Appointment$AppointmentBuilder.class
 com\utb\quality\ActivityApplication.class
+com\utb\quality\dto\AppointmentRequest$AppointmentRequestBuilder.class
 com\utb\quality\controller\AppointmentController.class
 com\utb\quality\exception\GlobalExceptionHandler.class
 com\utb\quality\service\AppointmentService.class

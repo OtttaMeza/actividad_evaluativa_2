@@ -1,5 +1,6 @@
 package com.utb.quality.service;
 
+import com.utb.quality.dto.AppointmentRequest;
 import com.utb.quality.model.Appointment;
 import com.utb.quality.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,21 +14,28 @@ public class AppointmentService {
     @Autowired
     private AppointmentRepository repository;
 
-    public Appointment createAppointment(Appointment appointment) {
+    public Appointment createAppointment(AppointmentRequest request) {
         // CP2: Validación de campos (Se hace vía @Valid en Controller, pero aquí reforzamos)
-        if (appointment.getClientName() == null || appointment.getClientName().isBlank()) {
+        if (request.getClientName() == null || request.getClientName().isBlank()) {
             throw new IllegalArgumentException("Este campo es obligatorio");
         }
 
         // CP3: Conflicto horario
-        if (repository.findByAppointmentTime(appointment.getAppointmentTime()).isPresent()) {
+        if (repository.findByAppointmentTime(request.getAppointmentTime()).isPresent()) {
             throw new IllegalStateException("Horario no disponible");
         }
 
         // CP9: Mascota no pertenece (Simulación de regla de negocio)
-        if (appointment.getPetId() != null && appointment.getPetId() > 100) {
+        if (request.getPetId() != null && request.getPetId() > 100) {
             throw new IllegalArgumentException("La mascota seleccionada no pertenece a tu perfil");
         }
+
+        Appointment appointment = Appointment.builder()
+                .clientName(request.getClientName())
+                .petName(request.getPetName())
+                .appointmentTime(request.getAppointmentTime())
+                .petId(request.getPetId())
+                .build();
 
         return repository.save(appointment);
     }

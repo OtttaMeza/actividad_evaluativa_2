@@ -1,5 +1,6 @@
 package com.utb.quality.controller;
 
+import com.utb.quality.dto.AppointmentRequest;
 import com.utb.quality.model.Appointment;
 import com.utb.quality.service.AppointmentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,8 +23,8 @@ public class AppointmentController {
 
     @PostMapping
     @Operation(summary = "Crear una nueva cita", description = "Valida campos obligatorios y traslape de horario")
-    public ResponseEntity<Appointment> create(@Valid @RequestBody Appointment appointment) {
-        return new ResponseEntity<>(service.createAppointment(appointment), HttpStatus.CREATED);
+    public ResponseEntity<Appointment> create(@Valid @RequestBody AppointmentRequest request) {
+        return new ResponseEntity<>(service.createAppointment(request), HttpStatus.CREATED);
     }
 
     @GetMapping
